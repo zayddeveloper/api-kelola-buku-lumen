@@ -63,25 +63,18 @@ class UsersController extends CustomController
         }
     }
 
-    public function updatePassword()
+    public function changePassword()
     {
         $user = Users::find($this->postField('id'));
 
         if (!Hash::check($this->postField('old_password'), $user->password)) {
-            return response()->json([
-                'message' => 'Password lama tidak valid',
-            ], 400);
+           
+            return $this->jsonResponse('Password lama tidak valid ', 403);
         }
 
-        $validatedData = $this->request->validate([
-            'new_password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user->password = $validatedData['new_password'];
+        $user->password =  Hash::make($this->postField('new_password'));
         $user->save();
 
-        return response()->json([
-            'message' => 'Password berhasil diubah',
-        ]);
+        return $this->jsonResponse('Password berhasil diubah ', 200);
     }
 }

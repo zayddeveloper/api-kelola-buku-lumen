@@ -29,6 +29,7 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
     $router->group(['prefix' => 'user'], function () use ($router) {
         $router->post('/login', 'UsersController@login');
         $router->post('/register', 'UsersController@store');
+        $router->post('/changePassword', 'UsersController@changePassword');
         $router->get('/(id)', 'UsersController@getByID');
     });
 
