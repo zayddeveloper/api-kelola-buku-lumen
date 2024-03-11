@@ -42,5 +42,7 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
         $router->delete('/{id}', 'BooksController@getByID');
         $router->delete('/', 'BooksController@deleteAll');
     });
+    
+    $router->get('/cetakPdf', 'BooksController@cetakPdf');
 
 });

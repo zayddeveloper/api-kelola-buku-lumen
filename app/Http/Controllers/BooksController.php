@@ -2,20 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Books;
 use App\Helper\CustomController;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BooksController extends CustomController
 {
 
     public function index()
     {
-        $data = Books::with(['users:id,nama'])->orderBy('created_at', 'DESC')->get();
-        if ($data->isEmpty()) {
-            return $this->jsonResponse('data not found!', 404);
+        try {
+            $date = $this->request->query->get('date');
+            $startDate = $this->request->query->get('start_date');
+            $endDate = $this->request->query->get('end_date');
+            $query = Books::with(['user']);
+            $data=[];
+            if (!$date) {
+                if (!$startDate && !$endDate) {
+                    $data = $query->orderBy('created_at', 'DESC')->get();
+                } else {
+                    $data = $query->whereDate('created_at', '<=', $endDate)
+                        ->whereDate('created_at', '>=', $startDate)->orderBy('created_at', 'DESC')->get();
+                }
+            } else {
+                $data = $query->whereDate('created_at', '=', $date)->orderBy('created_at', 'DESC')->get();
+            }
+            if ($data->isEmpty()) {
+                return $this->jsonResponse('Data ' . $date.' not found! ', 404);
+            }
+            return $this->jsonResponse('success', 200, $data);
+        } catch (\Throwable $e) {
+            return $this->jsonResponse('internal server error ' . $e->getMessage(), 500);
         }
-        return $this->jsonResponse('success', 200, $data);
     }
 
     public function store()
@@ -23,7 +41,7 @@ class BooksController extends CustomController
         try {
             $body = $this->parseRequestBody();
             $data = [
-                'kategori_id' => $body['kategori_id'] ?? 1,
+                'user_id' => $body['user_id'],
                 'judul' => $body['judul'],
                 'penulis' => $body['penulis'],
                 'penerbit' => $body['penerbit'],
@@ -93,4 +111,15 @@ class BooksController extends CustomController
         }
     }
 
+    public function cetakPdf()
+    {
+        try {
+            $data['data'] = Books::with(['user:id,nama'])->orderBy('created_at', 'DESC')->get();
+            $pdf = Pdf::loadview('books_pdf', $data);
+            return $pdf->download('laporan-pegawai-pdf'); // to download pdf
+//            return $pdf->stream(); // to show pdf on browser
+        } catch (\Throwable $e) {
+            return $this->jsonResponse('internal server error ' . $e->getMessage(), 500);
+        }
+    }
 }
