@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": true,
+    "prettier.documentSelectors": [
+        "**/*.{js,jsx,ts,tsx,vue,html,css,scss,less,json,md,mdx,graphql,yaml,yml,php}"
+      ],
+    "[blade]": {
+        "editor.defaultFormatter": "amirmarmul.laravel-blade-vscode",
+        "editor.formatOnSave": true
+      }
+}
